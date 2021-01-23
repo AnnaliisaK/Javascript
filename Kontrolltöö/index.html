@@ -34,62 +34,54 @@
         const heightIndicatorElement = document.getElementById('height-indicator');
         const weightIndicatorElement = document.getElementById('weight-indicator');
         const calculationResultElement = document.getElementById('bmi-result');
+
+
         
-        function newHeight(event) {
-            const currentWeight = parseFloat(event.target.value);
+        function handleSliderInput (event) {
             const currentHeight = parseFloat(heightRangeSliderElement.value);
-
-            weightIndicatorElement.textContent = `Kehakaal ${currentWeight} kg`;
-
-            calculateBMI(currentHeight, currentWeight);
-            persistSelection(currentHeight, currentWeight);
-        }
-
-        function newWeight(event) {
-            const currentHeight = parseFloat(event.target.value);
             const currentWeight = parseFloat(weightRangeSliderElement.value);
 
+            weightIndicatorElement.textContent = `Kehakaal ${currentWeight} kg`;
             heightIndicatorElement.textContent = `Pikkus ${currentHeight} cm`;
 
-            calculateBMI(currentHeight, currentWeight);
-            persistSelection(currentHeight, currentWeight);
+            calculationResultElement.textContent = calculateBMI(heightRangeSliderElement.value / 100, weightRangeSliderElement.value);
+            persistSelection(heightRangeSliderElement.value, weightRangeSliderElement.value, calculationResultElement.textContent);
         }
 
+       
 
         function calculateBMI(heightInMeters, weightInKilograms) {
-            const calculation = parseFloat((weightInKilograms / (Math.pow(heightInMeters, 2) / 100)) * 100).toFixed(2)
-
-            calculationResultElement.textContent = calculation;
-
-            return 0;
+            return (weightInKilograms / Math.pow(heightInMeters, 2)).toFixed(2);
         }
 
         function reloadRecentValuesFromLocalStorage() {
             const valuesFromLocalstorage = localStorage.getItem('lastSelectedValues');
+            
             if (valuesFromLocalstorage !== null) {
-                const { heightSliderValue, weightSliderValue } = JSON.parse(valuesFromLocalstorage);
-                weightRangeSliderElement.value = weightSliderValue || weightRangeSliderElement.value;
-                weightIndicatorElement.textContent = `Kehakaal ${weightRangeSliderElement.value} kg`;
-
-                heightRangeSliderElement.value = heightSliderValue || heightRangeSliderElement.value;
-                heightIndicatorElement.textContent = `Pikkus ${heightRangeSliderElement.value} cm`;
-
-                calculationResultElement.textContent = calculationResult || 0;
+                const {heightSliderValue, weightSliderValue, calculationResultValue} = JSON.parse(valuesFromLocalstorage);
+                
+                heightIndicatorElement.textContent = `Pikkus ${heightSliderValue} cm`;
+                weightIndicatorElement.textContent = `Kehakaal ${weightSliderValue} kg`;
+                weightRangeSliderElement.value = weightSliderValue;
+                heightRangeSliderElement.value = heightSliderValue;
+                calculationResultElement.textContent = calculationResultValue;
+               
             }
         }
 
-        function persistSelection(heightSliderValue, weightSliderValue) {
-            const calculationResult = calculateBMI(heightSliderValue, weightSliderValue);
-            const lastSelectedValues = { heightSliderValue, weightSliderValue, calculationResult };
+        function persistSelection(heightSliderValue, weightSliderValue, calculationResultValue) {
+            const lastSelectedValues = { heightSliderValue, weightSliderValue, calculationResultValue };
+            localStorage.setItem('lastSelectedValues', JSON.stringify({ heightSliderValue, weightSliderValue, calculationResultValue }));
+            
+            const per = JSON.stringify(lastSelectedValues);
 
-            localStorage.setItem('lastSelectedValues', JSON.stringify(lastSelectedValues));
+            localStorage.setItem('lastSelectedValues', per);
         }
 
         reloadRecentValuesFromLocalStorage();
-        heightRangeSliderElement.addEventListener('input', newHeight);
-        weightRangeSliderElement.addEventListener('input', newWeight);
-        
-        
+        heightRangeSliderElement.addEventListener('input', handleSliderInput);
+        weightRangeSliderElement.addEventListener('input', handleSliderInput); 
+
     </script>
 </body>
 
